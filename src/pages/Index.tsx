@@ -1,266 +1,291 @@
-import { BookOpen, Database, Code, Server } from "lucide-react";
-import { DocSection } from "@/components/DocSection";
-import { CodeBlock } from "@/components/CodeBlock";
-import { TableOfContents } from "@/components/TableOfContents";
-import { ToolCard } from "@/components/ToolCard";
-import { InfoBox } from "@/components/InfoBox";
-import { InteractiveCodeSection } from "@/components/InteractiveCodeSection";
-import { Card } from "@/components/ui/card";
+import React, { useState } from 'react';
+import { Copy, Check, ChevronRight, Terminal, Database, Layout, CheckCircle2, AlertCircle, Code2, FileCode, Play } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-const Index = () => {
-  const tocItems = [
-    { id: "overview", title: "Overview" },
-    { id: "prerequisites", title: "Prerequisites" },
-    { id: "mongodb-atlas", title: "MongoDB Atlas Setup" },
-    { id: "project-structure", title: "Project Structure" },
-    { id: "interactive-playground", title: "Interactive Playground" },
-    { id: "backend-setup", title: "Backend Setup" },
-    { id: "frontend-setup", title: "Frontend Setup" },
-    { id: "mongodb-compass", title: "MongoDB Compass" },
-    { id: "testing", title: "Testing" },
-    { id: "summary", title: "Summary" },
-  ];
+const Index: React.FC = () => {
+  const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, index: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  const CodeBlock: React.FC<{ code: string; language: string; id: string; title?: string }> = ({ 
+    code, 
+    language, 
+    id, 
+    title 
+  }) => (
+    <div className="relative group my-4">
+      {title && (
+        <div className="flex items-center gap-2 bg-slate-800 text-slate-200 px-4 py-2 rounded-t-lg border-b border-slate-700">
+          <FileCode className="w-4 h-4" />
+          <span className="text-sm font-mono">{title}</span>
+        </div>
+      )}
+      <div className="relative">
+        <pre className={`bg-slate-900 text-slate-100 p-4 ${title ? 'rounded-b-lg' : 'rounded-lg'} overflow-x-auto text-sm leading-relaxed`}>
+          <code className={`language-${language}`}>{code}</code>
+        </pre>
+        <button
+          onClick={() => copyToClipboard(code, id)}
+          className="absolute top-3 right-3 p-2 bg-slate-800 hover:bg-slate-700 rounded-md transition-all opacity-0 group-hover:opacity-100"
+          title="Copy to clipboard"
+        >
+          {copiedIndex === id ? (
+            <Check className="w-4 h-4 text-green-400" />
+          ) : (
+            <Copy className="w-4 h-4 text-slate-300" />
+          )}
+        </button>
+      </div>
+    </div>
+  );
+
+  const CommandBlock: React.FC<{ command: string; id: string }> = ({ command, id }) => (
+    <div className="relative group my-3">
+      <div className="flex items-center gap-2 bg-slate-950 text-green-400 px-4 py-3 rounded-lg font-mono text-sm border border-slate-800">
+        <Terminal className="w-4 h-4" />
+        <code>{command}</code>
+        <button
+          onClick={() => copyToClipboard(command, id)}
+          className="ml-auto p-1.5 bg-slate-800 hover:bg-slate-700 rounded transition-all opacity-0 group-hover:opacity-100"
+        >
+          {copiedIndex === id ? (
+            <Check className="w-3 h-3 text-green-400" />
+          ) : (
+            <Copy className="w-3 h-3 text-slate-300" />
+          )}
+        </button>
+      </div>
+    </div>
+  );
+
+  const Section: React.FC<{ 
+    title: string; 
+    icon: React.ReactNode; 
+    children: React.ReactNode;
+    id?: string;
+  }> = ({ title, icon, children, id }) => (
+    <section id={id} className="mb-12 scroll-mt-20">
+      <div className="flex items-center gap-3 mb-6 pb-3 border-b-2 border-blue-500">
+        <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
+          {icon}
+        </div>
+        <h2 className="text-3xl font-bold text-slate-800">{title}</h2>
+      </div>
+      <div className="space-y-4">{children}</div>
+    </section>
+  );
+
+  const Step: React.FC<{ number: number; title: string; children: React.ReactNode }> = ({ 
+    number, 
+    title, 
+    children 
+  }) => (
+    <div className="relative pl-8 pb-8 border-l-2 border-slate-200 last:border-l-0 last:pb-0">
+      <div className="absolute -left-[17px] top-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-lg">
+        {number}
+      </div>
+      <h3 className="text-xl font-semibold text-slate-800 mb-3">{title}</h3>
+      <div className="space-y-3">{children}</div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-docnav text-docnav-foreground border-b border-border/30 sticky top-0 z-50 backdrop-blur-sm bg-docnav/95">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center gap-3">
-            <BookOpen className="w-8 h-8 text-docnav-accent" />
-            <div>
-              <h1 className="text-2xl font-bold">Full Stack Todo Application</h1>
-              <p className="text-sm text-docnav-foreground/70">
-                React + Express + MongoDB Atlas
-              </p>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-16 px-6 shadow-xl">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center gap-3 mb-4">
+            <h1 className="text-5xl font-bold">Full-Stack Todo App</h1>
+          </div>
+          <p className="text-xl text-blue-100 mb-6">
+            React + Express + MongoDB Laboratory Exercise
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <span className="px-4 py-2 bg-white/20 rounded-full text-sm font-medium backdrop-blur-sm">
+              React
+            </span>
+            <span className="px-4 py-2 bg-white/20 rounded-full text-sm font-medium backdrop-blur-sm">
+              Express.js
+            </span>
+            <span className="px-4 py-2 bg-white/20 rounded-full text-sm font-medium backdrop-blur-sm">
+              MongoDB
+            </span>
           </div>
         </div>
-      </header>
+      </div>
+      <div className='p-4 bg-green-400 text-black text-center'>
+        <button><a href="/demo">Click Here</a></button>
+      </div>
 
-      <div className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Sidebar */}
-          <aside className="lg:col-span-3">
-            <TableOfContents items={tocItems} />
-          </aside>
-
-          {/* Main Content */}
-          <main className="lg:col-span-9">
-            {/* Overview */}
-            <DocSection id="overview" title="Overview">
-              <p className="text-lg leading-relaxed">
-                This documentation provides a comprehensive guide to building a full-stack
-                Todo application using modern web technologies. You will learn how to
-                create a complete CRUD application with a React frontend, Express backend,
-                and MongoDB Atlas database.
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                <Card className="p-6 border-border/50 text-center">
-                  <Code className="w-12 h-12 text-primary mx-auto mb-3" />
-                  <h3 className="font-semibold mb-2">React Frontend</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Modern UI with React and Axios
-                  </p>
-                </Card>
-                <Card className="p-6 border-border/50 text-center">
-                  <Server className="w-12 h-12 text-primary mx-auto mb-3" />
-                  <h3 className="font-semibold mb-2">Express Backend</h3>
-                  <p className="text-sm text-muted-foreground">
-                    RESTful API with Node.js
-                  </p>
-                </Card>
-                <Card className="p-6 border-border/50 text-center">
-                  <Database className="w-12 h-12 text-primary mx-auto mb-3" />
-                  <h3 className="font-semibold mb-2">MongoDB Atlas</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Cloud database solution
-                  </p>
-                </Card>
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-6 py-12">
+        
+        {/* Objective Card */}
+        <Card className="mb-12 shadow-lg border-l-4 border-l-blue-500">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-2xl">
+              <CheckCircle2 className="w-6 h-6 text-blue-500" />
+              Objective
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-slate-700 leading-relaxed">
+              This doc helps to understand how a full-stack web application works using modern technologies.
+            </p>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <Layout className="w-6 h-6 text-blue-600 mb-2" />
+                <h4 className="font-semibold text-slate-800 mb-1">Frontend</h4>
+                <p className="text-sm text-slate-600">React for user interface</p>
               </div>
-
-              <h3 className="text-xl font-semibold mt-8 mb-4">Learning Objectives</h3>
-              <ul className="list-disc list-inside space-y-2 ml-4">
-                <li>Create and configure a MongoDB Atlas database</li>
-                <li>Connect the database to a Node.js backend using Mongoose</li>
-                <li>Build a React frontend to interact with the backend API</li>
-                <li>Implement full CRUD operations (Create, Read, Update, Delete)</li>
-                <li>View and manage data in MongoDB Compass</li>
-              </ul>
-            </DocSection>
-
-            {/* Prerequisites */}
-            <DocSection id="prerequisites" title="Prerequisites">
-              <p>
-                Before starting, ensure you have the following software installed on your
-                Windows system:
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                <ToolCard
-                  name="Node.js (v18+)"
-                  description="JavaScript runtime environment"
-                  link="https://nodejs.org/"
-                />
-                <ToolCard
-                  name="Git"
-                  description="Version control system"
-                  link="https://git-scm.com/downloads"
-                />
-                <ToolCard
-                  name="MongoDB Compass"
-                  description="GUI for MongoDB"
-                  link="https://www.mongodb.com/try/download/compass"
-                />
-                <ToolCard
-                  name="VS Code"
-                  description="Code editor"
-                  link="https://code.visualstudio.com/"
-                />
+              <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                <Terminal className="w-6 h-6 text-green-600 mb-2" />
+                <h4 className="font-semibold text-slate-800 mb-1">Backend</h4>
+                <p className="text-sm text-slate-600">Express & Node.js for API</p>
               </div>
-
-              <h3 className="text-xl font-semibold mt-8 mb-4">Verify Installation</h3>
-              <p className="mb-4">
-                After installation, verify Node.js and npm by opening Command Prompt or
-                PowerShell and running:
-              </p>
-              <CodeBlock>
-                {`node -v
-npm -v`}
-              </CodeBlock>
-              <InfoBox type="success">
-                If you see version numbers (e.g., v18.x.x and 9.x.x), the installation was
-                successful.
-              </InfoBox>
-            </DocSection>
-
-            {/* MongoDB Atlas Setup */}
-            <DocSection id="mongodb-atlas" title="MongoDB Atlas Setup">
-              <p className="text-lg font-medium mb-4">
-                MongoDB Atlas is a cloud-based database service that provides a free tier
-                for development and learning.
-              </p>
-
-              <h3 className="text-xl font-semibold mt-6 mb-3">Step 1: Create an Atlas Account</h3>
-              <ol className="list-decimal list-inside space-y-2 ml-4">
-                <li>Navigate to <a href="https://www.mongodb.com/atlas" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://www.mongodb.com/atlas</a></li>
-                <li>Sign up with your Google account or email</li>
-                <li>Create a Free Shared Cluster</li>
-              </ol>
-
-              <h3 className="text-xl font-semibold mt-6 mb-3">Step 2: Configure the Cluster</h3>
-              <ul className="list-disc list-inside space-y-2 ml-4">
-                <li>Choose AWS, Google Cloud, or Azure as your cloud provider</li>
-                <li>Select a nearby region (e.g., Mumbai, Singapore, or US-East)</li>
-                <li>Click Create Cluster and wait for deployment (2-5 minutes)</li>
-              </ul>
-
-              <h3 className="text-xl font-semibold mt-6 mb-3">Step 3: Create a Database User</h3>
-              <ol className="list-decimal list-inside space-y-2 ml-4">
-                <li>In the left sidebar, select Database Access</li>
-                <li>Click Add New Database User</li>
-                <li>Set a username and password (e.g., student / student123)</li>
-                <li>Choose Read and Write to Any Database</li>
-                <li>Click Add User</li>
-              </ol>
-
-              <InfoBox type="warning">
-                Save your credentials securely. You will need them to connect to the
-                database.
-              </InfoBox>
-
-              <h3 className="text-xl font-semibold mt-6 mb-3">Step 4: Set Network Access</h3>
-              <ol className="list-decimal list-inside space-y-2 ml-4">
-                <li>In the sidebar, go to Network Access</li>
-                <li>Click Add IP Address</li>
-                <li>Choose Allow Access from Anywhere (0.0.0.0/0)</li>
-                <li>Confirm and save</li>
-              </ol>
-
-              <InfoBox type="info">
-                For production applications, restrict IP access to specific addresses.
-              </InfoBox>
-
-              <h3 className="text-xl font-semibold mt-6 mb-3">Step 5: Get the Connection String</h3>
-              <ol className="list-decimal list-inside space-y-2 ml-4">
-                <li>Go to Clusters and click Connect</li>
-                <li>Choose Connect your application</li>
-                <li>Select Node.js as the driver</li>
-                <li>Copy the connection string</li>
-              </ol>
-
-              <CodeBlock title="Example Connection String">
-                {`mongodb+srv://student:student123@cluster0.abcd.mongodb.net/todo_demo`}
-              </CodeBlock>
-
-              <InfoBox type="warning">
-                Replace the password placeholder in the connection string with your actual
-                password.
-              </InfoBox>
-            </DocSection>
-
-            {/* Interactive Playground */}
-            <DocSection id="interactive-playground" title="Interactive Code Playground">
-              <InteractiveCodeSection />
-            </DocSection>
-
-            {/* Project Structure */}
-            <DocSection id="project-structure" title="Project Structure">
-              <p>Create a new folder for your project with the following structure:</p>
-              <CodeBlock title="Directory Structure">
-                {`todo-fullstack/
-├── backend/
-│   ├── server.js
-│   └── package.json
-└── frontend/
-    ├── src/
-    ├── public/
-    └── package.json`}
-              </CodeBlock>
-
-              <p className="mt-4">
-                Open a terminal in your desired location and create the project directory:
-              </p>
-              <CodeBlock>
-                {`mkdir todo-fullstack
-cd todo-fullstack
-mkdir backend frontend`}
-              </CodeBlock>
-            </DocSection>
-
-            {/* Backend Setup */}
-            <DocSection id="backend-setup" title="Backend Setup">
-              <h3 className="text-xl font-semibold mb-4">Step 1: Initialize Backend</h3>
-              <p>Navigate to the backend folder and initialize a new Node.js project:</p>
-              <CodeBlock>
-                {`cd backend
-npm init -y`}
-              </CodeBlock>
-
-              <h3 className="text-xl font-semibold mt-6 mb-4">Step 2: Install Dependencies</h3>
-              <p className="mb-4">Install the required packages:</p>
-              <CodeBlock>
-                {`npm install express mongoose cors
-npm install -D nodemon`}
-              </CodeBlock>
-
-              <div className="mt-4">
-                <h4 className="font-semibold mb-2">Package Descriptions:</h4>
-                <ul className="list-disc list-inside space-y-1 ml-4 text-sm">
-                  <li><strong>express</strong>: Web framework for Node.js</li>
-                  <li><strong>mongoose</strong>: MongoDB object modeling tool</li>
-                  <li><strong>cors</strong>: Enable Cross-Origin Resource Sharing</li>
-                  <li><strong>nodemon</strong>: Auto-restart server on file changes</li>
-                </ul>
+              <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                <Database className="w-6 h-6 text-purple-600 mb-2" />
+                <h4 className="font-semibold text-slate-800 mb-1">Database</h4>
+                <p className="text-sm text-slate-600">MongoDB for data storage</p>
               </div>
+            </div>
+            <Alert className="bg-blue-50 border-blue-200">
+              <AlertCircle className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-slate-700">
+                <strong className="font-semibold">Learning Goals:</strong> Set up React frontend, connect Express to MongoDB, perform CRUD operations, and verify data in MongoDB Compass.
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
 
-              <h3 className="text-xl font-semibold mt-6 mb-4">Step 3: Create server.js</h3>
-              <p className="mb-4">
-                Create a new file named <code className="bg-muted px-2 py-1 rounded">server.js</code> in the backend folder:
-              </p>
-              <CodeBlock title="backend/server.js">
-                {`// server.js - Todo API (CRUD)
+        {/* Prerequisites */}
+        <Section title="Prerequisites" icon={<AlertCircle className="w-6 h-6" />} id="prerequisites">
+          <p className="text-slate-700 leading-relaxed">
+            Before starting, ensure the following are installed on your computer:
+          </p>
+          <div className="space-y-3">
+            <Card className="border-l-4 border-l-amber-500">
+              <CardContent className="pt-6">
+                <h4 className="font-semibold text-slate-800 mb-2 flex items-center gap-2">
+                  <ChevronRight className="w-4 h-4 text-amber-500" />
+                  Node.js and npm
+                </h4>
+                <p className="text-sm text-slate-600 mb-3">Verify installation:</p>
+                <CommandBlock command="node -v" id="node-version" />
+                <CommandBlock command="npm -v" id="npm-version" />
+              </CardContent>
+            </Card>
+
+            <Card className="border-l-4 border-l-green-500">
+              <CardContent className="pt-6">
+                <h4 className="font-semibold text-slate-800 mb-2 flex items-center gap-2">
+                  <ChevronRight className="w-4 h-4 text-green-500" />
+                  MongoDB Community Server
+                </h4>
+                <p className="text-sm text-slate-600">Installed locally and running on port 27017</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-l-4 border-l-purple-500">
+              <CardContent className="pt-6">
+                <h4 className="font-semibold text-slate-800 mb-2 flex items-center gap-2">
+                  <ChevronRight className="w-4 h-4 text-purple-500" />
+                  MongoDB Compass
+                </h4>
+                <p className="text-sm text-slate-600">GUI tool for viewing databases and collections</p>
+              </CardContent>
+            </Card>
+          </div>
+        </Section>
+
+        {/* MongoDB Setup */}
+        <Section title="Starting MongoDB (Windows)" icon={<Database className="w-6 h-6" />} id="mongodb">
+          <p className="text-slate-700 leading-relaxed">
+            MongoDB runs as a Windows service. To ensure it's running:
+          </p>
+          
+          <Tabs defaultValue="gui" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="gui">GUI Method</TabsTrigger>
+              <TabsTrigger value="cmd">Command Line</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="gui" className="space-y-3 mt-4">
+              <ol className="space-y-3 text-slate-700">
+                <li className="flex gap-2">
+                  <span className="font-semibold min-w-6">1.</span>
+                  <span>Press <kbd className="px-2 py-1 bg-slate-200 rounded text-xs font-mono">Windows + R</kbd>, type <code className="px-2 py-1 bg-slate-100 rounded text-sm">services.msc</code>, and press Enter</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="font-semibold min-w-6">2.</span>
+                  <span>Scroll down to find <strong>MongoDB</strong></span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="font-semibold min-w-6">3.</span>
+                  <span>Right-click MongoDB → select <strong>Start</strong> (if not already running)</span>
+                </li>
+              </ol>
+            </TabsContent>
+            
+            <TabsContent value="cmd" className="space-y-3 mt-4">
+              <p className="text-slate-700">Run Command Prompt as <strong>Administrator</strong>:</p>
+              <div className="space-y-2">
+                <p className="text-sm text-slate-600 font-semibold">Start MongoDB:</p>
+                <CommandBlock command="net start MongoDB" id="start-mongo" />
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-slate-600 font-semibold">Stop MongoDB:</p>
+                <CommandBlock command="net stop MongoDB" id="stop-mongo" />
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <Alert className="bg-green-50 border-green-200">
+            <CheckCircle2 className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-slate-700">
+              Once running, MongoDB will listen at: <code className="px-2 py-1 bg-white rounded text-sm font-mono">mongodb://127.0.0.1:27017</code>
+            </AlertDescription>
+          </Alert>
+        </Section>
+
+        {/* Project Structure */}
+        <Section title="Project Structure" icon={<Layout className="w-6 h-6" />} id="structure">
+          <p className="text-slate-700 leading-relaxed mb-4">
+            Create a new folder and organize your project:
+          </p>
+          <CodeBlock
+            code={`todo-demo/
+├─ backend/
+└─ frontend/`}
+            language="text"
+            id="structure"
+            title="Directory Structure"
+          />
+        </Section>
+
+        {/* Backend Setup */}
+        <Section title="Backend Setup (Express + MongoDB)" icon={<Terminal className="w-6 h-6" />} id="backend">
+          
+          <Step number={1} title="Initialize Backend Project">
+            <p className="text-slate-700">Navigate to your project directory and create the backend:</p>
+            <CommandBlock command="cd todo-demo" id="cd-todo" />
+            <CommandBlock command="mkdir backend" id="mkdir-backend" />
+            <CommandBlock command="cd backend" id="cd-backend" />
+            <CommandBlock command="npm init -y" id="npm-init" />
+            <CommandBlock command="npm install express mongoose cors" id="npm-install-backend" />
+          </Step>
+
+          <Step number={2} title="Create server.js">
+            <p className="text-slate-700">Create a file named <code className="px-2 py-1 bg-slate-100 rounded text-sm font-mono">server.js</code> in the backend folder:</p>
+            <CodeBlock
+              code={`// server.js - Todo API using Express and MongoDB
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -269,17 +294,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/todo_demo';
+// MongoDB connection URI
+const MONGO_URI = 'mongodb://127.0.0.1:27017/todo_demo';
 
 // Connect to MongoDB
 mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('[backend] MongoDB connected'))
-  .catch(err => {
-    console.error('[backend] MongoDB connection error:', err);
-    process.exit(1);
-  });
+  .then(() => console.log('MongoDB connected successfully'))
+  .catch((err) => console.error('MongoDB connection error:', err));
 
-// Todo schema
+// Todo Schema
 const todoSchema = new mongoose.Schema({
   text: { type: String, required: true },
   done: { type: Boolean, default: false },
@@ -287,13 +310,8 @@ const todoSchema = new mongoose.Schema({
   updatedAt: { type: Date }
 });
 
-// Update timestamps
-todoSchema.pre('save', function(next) {
+todoSchema.pre('save', function (next) {
   this.updatedAt = new Date();
-  next();
-});
-todoSchema.pre('findOneAndUpdate', function(next) {
-  this.set({ updatedAt: new Date() });
   next();
 });
 
@@ -301,503 +319,508 @@ const Todo = mongoose.model('Todo', todoSchema);
 
 // Routes
 
-// GET /todos - list all todos (newest first)
+// Get all todos
 app.get('/todos', async (req, res) => {
-  try {
-    const todos = await Todo.find().sort({ createdAt: -1 }).lean();
-    res.json(todos);
-  } catch (err) {
-    console.error('[backend] GET /todos error', err);
-    res.status(500).json({ error: 'internal server error' });
-  }
+  const todos = await Todo.find().sort({ createdAt: -1 }).lean();
+  res.json(todos);
 });
 
-// POST /todos - create a new todo
+// Create a new todo
 app.post('/todos', async (req, res) => {
-  try {
-    const { text } = req.body;
-    if (!text || !text.trim()) {
-      return res.status(400).json({ error: 'text is required' });
-    }
-    const todo = new Todo({ text: text.trim() });
-    await todo.save();
-    res.status(201).json(todo);
-  } catch (err) {
-    console.error('[backend] POST /todos error', err);
-    res.status(500).json({ error: 'internal server error' });
-  }
+  const { text } = req.body;
+  if (!text || !text.trim()) return res.status(400).json({ error: 'Text is required' });
+  const todo = new Todo({ text: text.trim() });
+  await todo.save();
+  res.status(201).json(todo);
 });
 
-// PUT /todos/:id - update a todo
+// Update a todo (mark done / edit text)
 app.put('/todos/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const update = {};
-    if (typeof req.body.text !== 'undefined') update.text = req.body.text;
-    if (typeof req.body.done !== 'undefined') update.done = req.body.done;
-    const todo = await Todo.findByIdAndUpdate(id, update, { 
-      new: true, 
-      runValidators: true 
-    });
-    if (!todo) return res.status(404).json({ error: 'not found' });
-    res.json(todo);
-  } catch (err) {
-    console.error('[backend] PUT /todos/:id error', err);
-    res.status(500).json({ error: 'internal server error' });
-  }
+  const { id } = req.params;
+  const update = {};
+  if (req.body.text !== undefined) update.text = req.body.text;
+  if (req.body.done !== undefined) update.done = req.body.done;
+  const todo = await Todo.findByIdAndUpdate(id, update, { new: true });
+  if (!todo) return res.status(404).json({ error: 'Todo not found' });
+  res.json(todo);
 });
 
-// DELETE /todos/:id - delete a todo
+// Delete a todo
 app.delete('/todos/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const todo = await Todo.findByIdAndDelete(id);
-    if (!todo) return res.status(404).json({ error: 'not found' });
-    res.json({ success: true });
-  } catch (err) {
-    console.error('[backend] DELETE /todos/:id error', err);
-    res.status(500).json({ error: 'internal server error' });
-  }
+  const { id } = req.params;
+  await Todo.findByIdAndDelete(id);
+  res.json({ success: true });
 });
 
-// Health check endpoint
+// Health check
 app.get('/health', (req, res) => res.json({ ok: true }));
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(\`[backend] listening on \${PORT}\`));`}
-              </CodeBlock>
+// Start server
+const PORT = 5000;
+app.listen(PORT, () => console.log(\`Server running on port \${PORT}\`));`}
+              language="javascript"
+              id="server-js"
+              title="server.js"
+            />
+          </Step>
 
-              <h3 className="text-xl font-semibold mt-6 mb-4">Step 4: Update package.json</h3>
-              <p className="mb-4">Add the following scripts to your <code className="bg-muted px-2 py-1 rounded">package.json</code>:</p>
-              <CodeBlock title="backend/package.json (scripts section)">
-                {`"scripts": {
-  "start": "node server.js",
-  "dev": "nodemon server.js"
-}`}
-              </CodeBlock>
+          <Step number={3} title="Run the Backend Server">
+            <p className="text-slate-700">Start your Express server:</p>
+            <CommandBlock command="node server.js" id="run-backend" />
+            <Alert className="bg-green-50 border-green-200">
+              <Play className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-slate-700">
+                <strong>Expected output:</strong><br/>
+                <code className="text-xs">MongoDB connected successfully</code><br/>
+                <code className="text-xs">Server running on port 5000</code>
+              </AlertDescription>
+            </Alert>
+            <p className="text-slate-700 mt-3">
+              The backend is now running at: <a href="http://localhost:5000" className="text-blue-600 hover:underline font-mono text-sm" target="_blank" rel="noopener noreferrer">http://localhost:5000</a>
+            </p>
+          </Step>
+        </Section>
 
-              <h3 className="text-xl font-semibold mt-6 mb-4">Step 5: Update Connection String</h3>
-              <p className="mb-4">
-                In <code className="bg-muted px-2 py-1 rounded">server.js</code>, replace the MONGO_URI with your MongoDB Atlas connection string:
-              </p>
-              <CodeBlock>
-                {`const MONGO_URI = 'mongodb+srv://student:student123@cluster0.abcd.mongodb.net/todo_demo';`}
-              </CodeBlock>
+        {/* Frontend Setup */}
+        <Section title="Frontend Setup (React)" icon={<Layout className="w-6 h-6" />} id="frontend">
+          
+          <Step number={1} title="Create React Application">
+            <p className="text-slate-700">Open a new terminal window and navigate to the <code className="px-2 py-1 bg-slate-100 rounded text-sm font-mono">todo-demo</code> folder:</p>
+            <CommandBlock command="npx create-react-app frontend" id="create-react" />
+            <CommandBlock command="cd frontend" id="cd-frontend" />
+            <CommandBlock command="npm install axios" id="npm-axios" />
+          </Step>
 
-              <h3 className="text-xl font-semibold mt-6 mb-4">Step 6: Run the Backend</h3>
-              <CodeBlock>
-                {`npm run dev`}
-              </CodeBlock>
-
-              <InfoBox type="success">
-                If successful, you should see: <br />
-                <code className="block mt-2 bg-code-bg text-code-foreground p-2 rounded">
-                  [backend] MongoDB connected<br />
-                  [backend] listening on 5000
-                </code>
-              </InfoBox>
-            </DocSection>
-
-            {/* Frontend Setup */}
-            <DocSection id="frontend-setup" title="Frontend Setup">
-              <h3 className="text-xl font-semibold mb-4">Step 1: Create React App</h3>
-              <p className="mb-4">
-                From the root folder (todo-fullstack), create a new React application:
-              </p>
-              <CodeBlock>
-                {`npx create-react-app frontend
-cd frontend
-npm install axios`}
-              </CodeBlock>
-
-              <h3 className="text-xl font-semibold mt-6 mb-4">Step 2: Update App.js</h3>
-              <p className="mb-4">
-                Replace the contents of <code className="bg-muted px-2 py-1 rounded">frontend/src/App.js</code>:
-              </p>
-              <CodeBlock title="frontend/src/App.js">
-                {`// src/App.js
-import React, { useEffect, useState } from 'react';
+          <Step number={2} title="Create App.js Component">
+            <p className="text-slate-700">Replace the content in <code className="px-2 py-1 bg-slate-100 rounded text-sm font-mono">src/App.js</code>:</p>
+            <CodeBlock
+              code={`import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const API = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-
-function TodoItem({ todo, onToggle, onDelete, onStartEdit, onSaveEdit }) {
-  const [editingText, setEditingText] = useState(todo.text);
-  const [isEditing, setIsEditing] = useState(false);
-
-  useEffect(() => {
-    setEditingText(todo.text);
-  }, [todo.text]);
-
-  function startEdit() {
-    setIsEditing(true);
-    onStartEdit && onStartEdit(todo._id);
-  }
-
-  function save() {
-    const text = editingText.trim();
-    if (!text) return;
-    onSaveEdit(todo._id, text).then(() => setIsEditing(false));
-  }
-
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'center', padding: 8,
-      borderBottom: '1px solid #eee'
-    }}>
-      <input
-        type="checkbox"
-        checked={todo.done}
-        onChange={() => onToggle(todo._id, !todo.done)}
-      />
-      <div style={{ flex: 1, marginLeft: 12 }}>
-        {isEditing ? (
-          <input
-            value={editingText}
-            onChange={e => setEditingText(e.target.value)}
-            onKeyDown={e => { 
-              if (e.key === 'Enter') save(); 
-              if (e.key === 'Escape') setIsEditing(false); 
-            }}
-            style={{ width: '100%', padding: 6 }}
-          />
-        ) : (
-          <div style={{ textDecoration: todo.done ? 'line-through' : 'none' }}>
-            {todo.text}
-          </div>
-        )}
-        <div style={{ fontSize: 12, color: '#666' }}>
-          {new Date(todo.createdAt).toLocaleString()}
-        </div>
-      </div>
-
-      {isEditing ? (
-        <button onClick={save} style={{ marginLeft: 8 }}>Save</button>
-      ) : (
-        <button onClick={startEdit} style={{ marginLeft: 8 }}>Edit</button>
-      )}
-      <button onClick={() => onDelete(todo._id)} style={{ marginLeft: 8 }}>
-        Delete
-      </button>
-    </div>
-  );
-}
+const API = 'http://localhost:5000';
 
 function App() {
   const [todos, setTodos] = useState([]);
   const [text, setText] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [creating, setCreating] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => { fetchTodos(); }, []);
 
   async function fetchTodos() {
-    setLoading(true);
-    setError(null);
     try {
       const res = await axios.get(\`\${API}/todos\`);
       setTodos(res.data);
-    } catch (err) {
-      setError('Failed to load todos');
-      console.error(err);
-    } finally {
-      setLoading(false);
+    } catch {
+      setError('Failed to fetch todos');
     }
   }
 
   async function addTodo(e) {
     e.preventDefault();
     if (!text.trim()) return;
-    setCreating(true);
-    try {
-      await axios.post(\`\${API}/todos\`, { text: text.trim() });
-      setText('');
-      fetchTodos();
-    } catch (err) {
-      setError('Failed to create todo');
-      console.error(err);
-    } finally {
-      setCreating(false);
-    }
+    await axios.post(\`\${API}/todos\`, { text: text.trim() });
+    setText('');
+    fetchTodos();
   }
 
-  async function toggleTodo(id, done) {
-    try {
-      await axios.put(\`\${API}/todos/\${id}\`, { done });
-      setTodos(prev => prev.map(t => t._id === id ? { ...t, done } : t));
-    } catch (err) {
-      setError('Failed to update todo');
-      console.error(err);
-    }
+  async function toggleDone(id, done) {
+    await axios.put(\`\${API}/todos/\${id}\`, { done });
+    fetchTodos();
   }
 
   async function deleteTodo(id) {
-    if (!window.confirm('Delete this todo?')) return;
-    try {
-      await axios.delete(\`\${API}/todos/\${id}\`);
-      setTodos(prev => prev.filter(t => t._id !== id));
-    } catch (err) {
-      setError('Failed to delete');
-      console.error(err);
-    }
-  }
-
-  async function saveEdit(id, newText) {
-    try {
-      await axios.put(\`\${API}/todos/\${id}\`, { text: newText });
-      setTodos(prev => prev.map(t => t._id === id ? { ...t, text: newText } : t));
-    } catch (err) {
-      setError('Failed to save edit');
-      console.error(err);
-    }
+    await axios.delete(\`\${API}/todos/\${id}\`);
+    fetchTodos();
   }
 
   return (
-    <div style={{ 
-      maxWidth: 760, 
-      margin: '40px auto', 
-      fontFamily: 'Segoe UI, Roboto, sans-serif' 
-    }}>
-      <h1>Todo Demo — Simple CRUD</h1>
-
-      <form onSubmit={addTodo} style={{ display: 'flex', marginBottom: 16 }}>
+    <div style={{ maxWidth: 700, margin: '40px auto', fontFamily: 'sans-serif' }}>
+      <h1>Todo Application</h1>
+      <form onSubmit={addTodo} style={{ marginBottom: 16 }}>
         <input
           value={text}
-          onChange={e => setText(e.target.value)}
-          placeholder="Write a new todo..."
-          style={{ flex: 1, padding: 10 }}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Enter a task..."
+          style={{ width: '70%', padding: 8 }}
         />
-        <button 
-          type="submit" 
-          disabled={creating} 
-          style={{ marginLeft: 8, padding: '8px 12px' }}
-        >
-          {creating ? 'Adding...' : 'Add'}
-        </button>
+        <button type="submit" style={{ marginLeft: 8, padding: '8px 12px' }}>Add</button>
       </form>
 
-      {error && <div style={{ color: 'crimson', marginBottom: 12 }}>{error}</div>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
 
-      <div style={{ border: '1px solid #e6e6e6', borderRadius: 6 }}>
-        {loading ? <div style={{ padding: 12 }}>Loading...</div> : null}
-        {!loading && todos.length === 0 ? (
-          <div style={{ padding: 12 }}>No todos yet</div>
-        ) : null}
+      <ul style={{ listStyle: 'none', padding: 0 }}>
         {todos.map(todo => (
-          <TodoItem
-            key={todo._id}
-            todo={todo}
-            onToggle={toggleTodo}
-            onDelete={deleteTodo}
-            onSaveEdit={saveEdit}
-          />
+          <li key={todo._id} style={{ marginBottom: 10, display: 'flex', alignItems: 'center' }}>
+            <input
+              type="checkbox"
+              checked={todo.done}
+              onChange={() => toggleDone(todo._id, !todo.done)}
+            />
+            <span style={{
+              flex: 1,
+              marginLeft: 10,
+              textDecoration: todo.done ? 'line-through' : 'none'
+            }}>
+              {todo.text}
+            </span>
+            <button onClick={() => deleteTodo(todo._id)} style={{ marginLeft: 8 }}>Delete</button>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }
 
 export default App;`}
-              </CodeBlock>
+              language="javascript"
+              id="app-js"
+              title="src/App.js"
+            />
+          </Step>
 
-              <h3 className="text-xl font-semibold mt-6 mb-4">Step 3: Start React Development Server</h3>
-              <CodeBlock>
-                {`npm start`}
-              </CodeBlock>
+          <Step number={3} title="Run the React Frontend">
+            <p className="text-slate-700">Start the React development server:</p>
+            <CommandBlock command="npm start" id="npm-start" />
+            <Alert className="bg-blue-50 border-blue-200">
+              <Play className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-slate-700">
+                Your frontend will automatically open at: <a href="http://localhost:3000" className="text-blue-600 hover:underline font-mono" target="_blank" rel="noopener noreferrer">http://localhost:3000</a>
+              </AlertDescription>
+            </Alert>
+          </Step>
+        </Section>
 
-              <InfoBox type="success">
-                Open <a href="http://localhost:3000" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">http://localhost:3000</a> in your browser. You should be able to:<br />
-                <ul className="list-disc list-inside mt-2 ml-4">
-                  <li>Add new tasks</li>
-                  <li>Mark tasks as complete/incomplete</li>
-                  <li>Edit task text</li>
-                  <li>Delete tasks</li>
+        {/* Testing */}
+        <Section title="Testing the Application" icon={<CheckCircle2 className="w-6 h-6" />} id="testing">
+          <Alert className="bg-amber-50 border-amber-200 mb-4">
+            <AlertCircle className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-slate-700">
+              <strong>Important:</strong> Ensure both servers are running simultaneously in separate terminal windows.
+            </AlertDescription>
+          </Alert>
+
+          <div className="grid md:grid-cols-2 gap-4 mb-6">
+            <Card className="border-l-4 border-l-green-500">
+              <CardContent className="pt-6">
+                <h4 className="font-semibold text-slate-800 mb-2 flex items-center gap-2">
+                  <Terminal className="w-4 h-4 text-green-500" />
+                  Backend
+                </h4>
+                <a href="http://localhost:5000" className="text-sm text-blue-600 hover:underline font-mono" target="_blank" rel="noopener noreferrer">
+                  http://localhost:5000
+                </a>
+              </CardContent>
+            </Card>
+
+            <Card className="border-l-4 border-l-blue-500">
+              <CardContent className="pt-6">
+                <h4 className="font-semibold text-slate-800 mb-2 flex items-center gap-2">
+                  <Layout className="w-4 h-4 text-blue-500" />
+                  Frontend
+                </h4>
+                <a href="http://localhost:3000" className="text-sm text-blue-600 hover:underline font-mono" target="_blank" rel="noopener noreferrer">
+                  http://localhost:3000
+                </a>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Test Steps</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ol className="space-y-3 text-slate-700">
+                <li className="flex gap-3">
+                  <span className="flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold flex-shrink-0">1</span>
+                  <span>Open the React app in your browser</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold flex-shrink-0">2</span>
+                  <span>Add a new todo item using the input field</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold flex-shrink-0">3</span>
+                  <span>Mark a todo as complete by clicking the checkbox</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold flex-shrink-0">4</span>
+                  <span>Delete a todo item using the Delete button</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold flex-shrink-0">5</span>
+                  <span>Verify data changes in MongoDB Compass (see next section)</span>
+                </li>
+              </ol>
+            </CardContent>
+          </Card>
+        </Section>
+
+        {/* MongoDB Compass */}
+        <Section title="Viewing Data in MongoDB Compass" icon={<Database className="w-6 h-6" />} id="compass">
+          <p className="text-slate-700 leading-relaxed mb-4">
+            MongoDB Compass is a GUI tool that lets you visualize and manage your database:
+          </p>
+
+          <div className="space-y-4">
+            <Card>
+              <CardContent className="pt-6">
+                <ol className="space-y-4 text-slate-700">
+                  <li className="flex gap-3">
+                    <span className="flex items-center justify-center w-6 h-6 bg-purple-100 text-purple-600 rounded-full text-sm font-semibold flex-shrink-0">1</span>
+                    <div className="flex-1">
+                      <p className="mb-2">Open MongoDB Compass application</p>
+                    </div>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="flex items-center justify-center w-6 h-6 bg-purple-100 text-purple-600 rounded-full text-sm font-semibold flex-shrink-0">2</span>
+                    <div className="flex-1">
+                      <p className="mb-2">In the connection field, enter:</p>
+                      <code className="block px-4 py-2 bg-slate-900 text-green-400 rounded font-mono text-sm">mongodb://127.0.0.1:27017</code>
+                    </div>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="flex items-center justify-center w-6 h-6 bg-purple-100 text-purple-600 rounded-full text-sm font-semibold flex-shrink-0">3</span>
+                    <div className="flex-1">
+                      <p>Click <strong>Connect</strong></p>
+                    </div>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="flex items-center justify-center w-6 h-6 bg-purple-100 text-purple-600 rounded-full text-sm font-semibold flex-shrink-0">4</span>
+                    <div className="flex-1">
+                      <p>In the list of databases, open: <code className="px-2 py-1 bg-slate-100 rounded text-sm font-mono">todo_demo</code></p>
+                    </div>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="flex items-center justify-center w-6 h-6 bg-purple-100 text-purple-600 rounded-full text-sm font-semibold flex-shrink-0">5</span>
+                    <div className="flex-1">
+                      <p>Click on the <code className="px-2 py-1 bg-slate-100 rounded text-sm font-mono">todos</code> collection</p>
+                    </div>
+                  </li>
+                </ol>
+              </CardContent>
+            </Card>
+
+            <Alert className="bg-purple-50 border-purple-200">
+              <Database className="h-4 w-4 text-purple-600" />
+              <AlertDescription className="text-slate-700">
+                <strong>Sample Data Structure:</strong> You'll see documents like this in your collection
+              </AlertDescription>
+            </Alert>
+
+            <CodeBlock
+              code={`{
+  "_id": "67335b2c4f12b2",
+  "text": "WAD Lab Exercise",
+  "done": false,
+  "createdAt": "2025-11-12T12:33:44.125Z",
+  "updatedAt": "2025-11-12T12:33:44.125Z"
+}`}
+              language="json"
+              id="sample-data"
+              title="Sample Todo Document"
+            />
+
+            <p className="text-slate-700">
+              As you add, modify, or delete items in the frontend, refreshing Compass will reflect the changes in real-time.
+            </p>
+          </div>
+        </Section>
+
+        {/* Command Summary */}
+        <Section title="Command Summary" icon={<Terminal className="w-6 h-6" />} id="summary">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Quick Reference</CardTitle>
+              <CardDescription>All essential commands in one place</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b-2 border-slate-200">
+                      <th className="text-left py-3 px-4 font-semibold text-slate-800">Purpose</th>
+                      <th className="text-left py-3 px-4 font-semibold text-slate-800">Command</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    <tr className="hover:bg-slate-50">
+                      <td className="py-3 px-4 text-slate-700">Start MongoDB (Windows)</td>
+                      <td className="py-3 px-4">
+                        <code className="px-2 py-1 bg-slate-900 text-green-400 rounded text-xs font-mono">net start MongoDB</code>
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="py-3 px-4 text-slate-700">Stop MongoDB</td>
+                      <td className="py-3 px-4">
+                        <code className="px-2 py-1 bg-slate-900 text-green-400 rounded text-xs font-mono">net stop MongoDB</code>
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="py-3 px-4 text-slate-700">Start backend</td>
+                      <td className="py-3 px-4">
+                        <code className="px-2 py-1 bg-slate-900 text-green-400 rounded text-xs font-mono">node server.js</code>
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="py-3 px-4 text-slate-700">Start frontend</td>
+                      <td className="py-3 px-4">
+                        <code className="px-2 py-1 bg-slate-900 text-green-400 rounded text-xs font-mono">npm start</code>
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="py-3 px-4 text-slate-700">Access frontend</td>
+                      <td className="py-3 px-4">
+                        <a href="http://localhost:3000" className="text-blue-600 hover:underline text-xs font-mono" target="_blank" rel="noopener noreferrer">http://localhost:3000</a>
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="py-3 px-4 text-slate-700">Access backend API</td>
+                      <td className="py-3 px-4">
+                        <a href="http://localhost:5000/todos" className="text-blue-600 hover:underline text-xs font-mono" target="_blank" rel="noopener noreferrer">http://localhost:5000/todos</a>
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="py-3 px-4 text-slate-700">MongoDB Connection</td>
+                      <td className="py-3 px-4">
+                        <code className="px-2 py-1 bg-slate-900 text-green-400 rounded text-xs font-mono">mongodb://127.0.0.1:27017/todo_demo</code>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </Section>
+
+        {/* Learning Outcomes */}
+        <Section title="Learning Outcomes" icon={<CheckCircle2 className="w-6 h-6" />} id="outcomes">
+          <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-green-800">
+                <CheckCircle2 className="w-5 h-5" />
+                What You'll Learn
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                    <p className="text-slate-700 text-sm">Build a simple full-stack CRUD web application</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                    <p className="text-slate-700 text-sm">Understand how React communicates with a backend via HTTP APIs</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                    <p className="text-slate-700 text-sm">Connect an Express backend to MongoDB using Mongoose</p>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                    <p className="text-slate-700 text-sm">Implement RESTful API endpoints for CRUD operations</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                    <p className="text-slate-700 text-sm">Use MongoDB Compass to visualize and manage stored data</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                    <p className="text-slate-700 text-sm">Master the fundamentals of full-stack development</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Section>
+
+        {/* Troubleshooting */}
+        <Section title="Common Issues & Solutions" icon={<AlertCircle className="w-6 h-6" />} id="troubleshooting">
+          <div className="space-y-4">
+            <Card className="border-l-4 border-l-red-500">
+              <CardHeader>
+                <CardTitle className="text-lg text-red-700">MongoDB Connection Error</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <p className="text-slate-700"><strong>Problem:</strong> "MongoDB connection error" in backend console</p>
+                <p className="text-slate-700"><strong>Solution:</strong></p>
+                <ul className="list-disc list-inside space-y-1 text-slate-600 ml-4">
+                  <li>Ensure MongoDB service is running (check services.msc)</li>
+                  <li>Verify MongoDB is listening on port 27017</li>
+                  <li>Check firewall settings aren't blocking the connection</li>
                 </ul>
-              </InfoBox>
-            </DocSection>
+              </CardContent>
+            </Card>
 
-            {/* MongoDB Compass */}
-            <DocSection id="mongodb-compass" title="Viewing Data in MongoDB Compass">
-              <p>
-                MongoDB Compass is a powerful GUI tool that allows you to visualize and
-                manage your database data.
-              </p>
+            <Card className="border-l-4 border-l-amber-500">
+              <CardHeader>
+                <CardTitle className="text-lg text-amber-700">CORS Error</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <p className="text-slate-700"><strong>Problem:</strong> "CORS policy" error in browser console</p>
+                <p className="text-slate-700"><strong>Solution:</strong></p>
+                <ul className="list-disc list-inside space-y-1 text-slate-600 ml-4">
+                  <li>Ensure <code className="px-1 py-0.5 bg-slate-100 rounded text-xs">cors</code> package is installed in backend</li>
+                  <li>Verify <code className="px-1 py-0.5 bg-slate-100 rounded text-xs">app.use(cors())</code> is in server.js</li>
+                  <li>Restart the backend server after adding CORS</li>
+                </ul>
+              </CardContent>
+            </Card>
 
-              <h3 className="text-xl font-semibold mt-6 mb-4">Step 1: Open MongoDB Compass</h3>
-              <p>Launch MongoDB Compass on your system.</p>
+            <Card className="border-l-4 border-l-blue-500">
+              <CardHeader>
+                <CardTitle className="text-lg text-blue-700">Port Already in Use</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <p className="text-slate-700"><strong>Problem:</strong> "Port 5000 is already in use"</p>
+                <p className="text-slate-700"><strong>Solution:</strong></p>
+                <ul className="list-disc list-inside space-y-1 text-slate-600 ml-4">
+                  <li>Close any other applications using port 5000</li>
+                  <li>Change the PORT variable in server.js to a different port (e.g., 5001)</li>
+                  <li>Update the API URL in React's App.js to match</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </Section>
 
-              <h3 className="text-xl font-semibold mt-6 mb-4">Step 2: Connect to Atlas</h3>
-              <ol className="list-decimal list-inside space-y-2 ml-4">
-                <li>Click New Connection</li>
-                <li>Paste your MongoDB Atlas connection string</li>
-                <li>Click Connect</li>
-              </ol>
-              <CodeBlock title="Example Connection String">
-                {`mongodb+srv://student:student123@cluster0.abcd.mongodb.net/todo_demo`}
-              </CodeBlock>
-
-              <h3 className="text-xl font-semibold mt-6 mb-4">Step 3: Navigate to Your Data</h3>
-              <ol className="list-decimal list-inside space-y-2 ml-4">
-                <li>In the left sidebar, select your database: <strong>todo_demo</strong></li>
-                <li>Click on the collection: <strong>todos</strong></li>
-                <li>You will see all documents representing your todo items</li>
-              </ol>
-
-              <h3 className="text-xl font-semibold mt-6 mb-4">Step 4: Interact with Data</h3>
-              <p>In MongoDB Compass, you can:</p>
-              <ul className="list-disc list-inside space-y-2 ml-4">
-                <li>View all document fields (text, done, createdAt, updatedAt)</li>
-                <li>Edit documents directly by clicking on them</li>
-                <li>Delete documents using the trash icon</li>
-                <li>Add new documents manually</li>
-                <li>Filter and search documents</li>
-              </ul>
-
-              <InfoBox type="info">
-                Any changes made in Compass will be reflected in your React application
-                after refreshing the page.
-              </InfoBox>
-            </DocSection>
-
-            {/* Testing */}
-            <DocSection id="testing" title="Testing Your Application">
-              <h3 className="text-xl font-semibold mb-4">Complete Workflow Test</h3>
-              
-              <ol className="space-y-4">
-                <li>
-                  <strong>1. Ensure Backend is Running</strong>
-                  <CodeBlock>
-                    {`cd backend
-npm run dev`}
-                  </CodeBlock>
-                </li>
-                
-                <li>
-                  <strong>2. Ensure Frontend is Running</strong>
-                  <CodeBlock>
-                    {`cd frontend
-npm start`}
-                  </CodeBlock>
-                </li>
-                
-                <li>
-                  <strong>3. Test CRUD Operations in Browser</strong>
-                  <ul className="list-disc list-inside ml-4 mt-2 space-y-1">
-                    <li>Open http://localhost:3000</li>
-                    <li>Add a new todo item</li>
-                    <li>Mark it as complete</li>
-                    <li>Edit the text</li>
-                    <li>Delete the item</li>
-                  </ul>
-                </li>
-                
-                <li>
-                  <strong>4. Verify in MongoDB Compass</strong>
-                  <ul className="list-disc list-inside ml-4 mt-2 space-y-1">
-                    <li>Open Compass and connect to your database</li>
-                    <li>Navigate to todo_demo &gt; todos collection</li>
-                    <li>Verify that your todos appear</li>
-                    <li>Try editing a document in Compass</li>
-                    <li>Refresh your React app to see the changes</li>
-                  </ul>
-                </li>
-              </ol>
-
-              <InfoBox type="success">
-                If all steps work correctly, congratulations! You have successfully built
-                and tested a full-stack application.
-              </InfoBox>
-            </DocSection>
-
-            {/* Summary */}
-            <DocSection id="summary" title="Summary">
-              <h3 className="text-xl font-semibold mb-4">What You Have Learned</h3>
-              <p className="mb-4">By completing this tutorial, you have gained knowledge in:</p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="p-4 border-border/50">
-                  <h4 className="font-semibold mb-2 flex items-center gap-2">
-                    <Database className="w-5 h-5 text-primary" />
-                    Database Management
-                  </h4>
-                  <ul className="text-sm space-y-1 ml-6 list-disc">
-                    <li>Setting up MongoDB Atlas</li>
-                    <li>Creating database users and configuring access</li>
-                    <li>Using MongoDB Compass to view and edit data</li>
-                  </ul>
-                </Card>
-
-                <Card className="p-4 border-border/50">
-                  <h4 className="font-semibold mb-2 flex items-center gap-2">
-                    <Server className="w-5 h-5 text-primary" />
-                    Backend Development
-                  </h4>
-                  <ul className="text-sm space-y-1 ml-6 list-disc">
-                    <li>Creating RESTful APIs with Express</li>
-                    <li>Connecting to MongoDB using Mongoose</li>
-                    <li>Implementing CRUD operations</li>
-                  </ul>
-                </Card>
-
-                <Card className="p-4 border-border/50">
-                  <h4 className="font-semibold mb-2 flex items-center gap-2">
-                    <Code className="w-5 h-5 text-primary" />
-                    Frontend Development
-                  </h4>
-                  <ul className="text-sm space-y-1 ml-6 list-disc">
-                    <li>Building user interfaces with React</li>
-                    <li>Making HTTP requests with Axios</li>
-                    <li>Managing state with React hooks</li>
-                  </ul>
-                </Card>
-
-                <Card className="p-4 border-border/50">
-                  <h4 className="font-semibold mb-2 flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-primary" />
-                    Full Stack Integration
-                  </h4>
-                  <ul className="text-sm space-y-1 ml-6 list-disc">
-                    <li>Connecting frontend to backend APIs</li>
-                    <li>Understanding client-server architecture</li>
-                    <li>Debugging and testing full-stack applications</li>
-                  </ul>
-                </Card>
+        {/* Footer */}
+        <div className="mt-16 pt-8 border-t-2 border-slate-200">
+          <Card className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Ready to Build?</h3>
+                  <p className="text-blue-100">Follow the steps above and create your first full-stack application!</p>
+                </div>
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className="px-6 py-2 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
+                  >
+                    Back to Top
+                  </button>
+                </div>
               </div>
-
-              <h3 className="text-xl font-semibold mt-8 mb-4">Optional Enhancements</h3>
-              <p className="mb-4">For further practice, consider implementing:</p>
-              <ul className="list-disc list-inside space-y-2 ml-4">
-                <li>Add a due date field to each todo</li>
-                <li>Implement filtering for completed vs pending tasks</li>
-                <li>Add priority levels (high, medium, low)</li>
-                <li>Deploy the backend to Render or Railway</li>
-                <li>Deploy the frontend to Vercel or Netlify</li>
-                <li>Use environment variables (.env) for sensitive data</li>
-                <li>Add user authentication</li>
-              </ul>
-
-              <div className="mt-8 p-6 bg-primary/10 border-l-4 border-primary rounded">
-                <h4 className="font-semibold text-lg mb-2">Next Steps</h4>
-                <p className="text-sm">
-                  Continue building on this foundation by exploring advanced topics such
-                  as authentication, data validation, error handling, and production
-                  deployment strategies. The skills you have learned here form the basis
-                  for developing modern full-stack web applications.
-                </p>
-              </div>
-            </DocSection>
-          </main>
+            </CardContent>
+          </Card>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="bg-muted border-t border-border/30 mt-16">
-        <div className="container mx-auto px-6 py-8 text-center text-sm text-muted-foreground">
-          <p>Full Stack Todo Application Documentation</p>
-          <p className="mt-2">Built with React + Express + MongoDB Atlas</p>
-        </div>
-      </footer>
     </div>
   );
 };
